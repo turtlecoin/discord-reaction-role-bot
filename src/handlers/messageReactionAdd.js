@@ -1,34 +1,74 @@
 const flattenArray = require('../util/flattenArray');
 const getEmojiKey = require('../util/getEmojiKey');
-const getMember = require('../util/getMember');
-const getRoleIds = require('../util/getRoleIds');
-const getRule = require('../util/getRule');
-const hasEveryRole = require('../util/hasEveryRole');
 const removeDuplicates = require('../util/removeDuplicates');
+const { rules } = require('../config');
 
 module.exports = async (messageReaction, user) => {
-  if (user.bot) return;
+    /* Bots not welcome! */
+    if (user.bot) {
+        return;
+    }
 
-  const rule = getRule(messageReaction.message.id);
-  if (!rule) return;
+    /* Get the rules to apply to the message reacted to */
+    const rule = rules[messageReaction.message.id];
 
-  const roleIds = getRoleIds(getEmojiKey(messageReaction.emoji), rule);
-  if (!roleIds) return;
+    /* No rules to apply for this message, we're done. */
+    if (!rule) {
+        return;
+    }
 
-  const member = await getMember(user, rule);
-  if (!member) return;
+    /* Get the corresponding roles to apply for the reaction clicked */
+    const roleIds = rule.emojiRoleMap[getEmojiKey(messageReaction.emoji)];
 
-  messageReaction.users.remove(user);
+    /* No roles to apply for the reaction clicked. */
+    if (!roleIds) {
+        return;
+    }
 
-  if (hasEveryRole(member, roleIds)) {
-    return await member.roles.remove(roleIds);
-  }
+    /* Get the channel the user is reacting in */
+    const channel = await user.client.channels.fetch(rule.channelId);
 
-  await member.roles.add(roleIds);
-  if (!rule.isUnique) return;
+    /* Get the user info from that channel */
+    const member = await channel.guild.members.fetch(user);
 
-  const roleIdsToRemove = removeDuplicates(
-    flattenArray(Object.values(rule.emojiRoleMap))
-  ).filter(roleId => !roleIds.includes(roleId));
-  await member.roles.remove(roleIdsToRemove);
+    /* Member doesn't exist. Maybe they left the server, or something. */
+    if (!member) {
+        return;
+    }
+
+    /* Remove the users reaction from the post. */
+    messageReaction.users.remove(user);
+
+    /* If the user already has every role we want to apply, then we remove
+     * all the roles. */
+    if (roleIds.every((roleId) => member.roles.get(roleId))) {
+        await member.roles.remove(roleIds);
+        return;
+    }
+
+    /* Otherwise, apply the roles we want to apply. */
+    await member.roles.add(roleIds);
+
+    /* If we should respond when the user gets the role */
+    if (rule.response) {
+        /* Fetch the channel to respond in */
+        const msgChannel = await user.client.channels.fetch(rule.response.channel);
+
+        if (msgChannel && msgChannel.type === 'text') {
+            msgChannel.send(rule.response.content(user));
+        }
+    }
+
+    /* The user can have as many role groups as they like. */
+    if (!rule.isUnique) {
+        return;
+    }
+
+    /* Otherwise, find any roles that are applied by other emoji 'groups' */
+    const roleIdsToRemove = removeDuplicates(
+        flattenArray(Object.values(rule.emojiRoleMap))
+    ).filter((roleId) => !roleIds.includes(roleId));
+
+    /* And remove them. */
+    await member.roles.remove(roleIdsToRemove);
 };
