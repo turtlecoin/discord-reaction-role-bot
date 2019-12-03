@@ -1,4 +1,3 @@
-const flattenArray = require('../util/flattenArray');
 const getEmojiKey = require('../util/getEmojiKey');
 const removeDuplicates = require('../util/removeDuplicates');
 const { rules } = require('../config');
@@ -39,14 +38,12 @@ module.exports = async (messageReaction, user) => {
     /* Remove the users reaction from the post. */
     messageReaction.users.remove(user);
 
-    /* If the user already has every role we want to apply, then we remove
-     * all the roles. */
+    /* User already has the roles, don't do anything. */
     if (roleIds.every((roleId) => member.roles.get(roleId))) {
-        await member.roles.remove(roleIds);
         return;
     }
 
-    /* Otherwise, apply the roles we want to apply. */
+    /* Apply the roles we want to apply. */
     await member.roles.add(roleIds);
 
     /* If we should respond when the user gets the role */
@@ -58,17 +55,4 @@ module.exports = async (messageReaction, user) => {
             msgChannel.send(rule.response.content(user));
         }
     }
-
-    /* The user can have as many role groups as they like. */
-    if (!rule.isUnique) {
-        return;
-    }
-
-    /* Otherwise, find any roles that are applied by other emoji 'groups' */
-    const roleIdsToRemove = removeDuplicates(
-        flattenArray(Object.values(rule.emojiRoleMap))
-    ).filter((roleId) => !roleIds.includes(roleId));
-
-    /* And remove them. */
-    await member.roles.remove(roleIdsToRemove);
 };

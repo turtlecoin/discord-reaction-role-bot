@@ -3,7 +3,6 @@ module.exports = {
     rules: {
         '628591450153811968': {
             channelId: '628588108157288459',
-            isUnique: true,
             emojiRoleMap: {
                 '🐢': ['628588267763138571']
             },
