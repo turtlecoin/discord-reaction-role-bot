@@ -21,6 +21,8 @@ module.exports = async (messageReaction, user) => {
 
     /* No roles to apply for the reaction clicked. */
     if (!roleIds) {
+        /* Remove their reaction */
+        messageReaction.users.remove(user);
         return;
     }
 
@@ -34,9 +36,6 @@ module.exports = async (messageReaction, user) => {
     if (!member) {
         return;
     }
-
-    /* Remove the users reaction from the post. */
-    messageReaction.users.remove(user);
 
     /* User already has the roles, don't do anything. */
     if (roleIds.every((roleId) => member.roles.get(roleId))) {
