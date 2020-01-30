@@ -3,11 +3,11 @@ const removeDuplicates = require('../util/removeDuplicates');
 const { rules } = require('../config');
 
 module.exports = async (messageReaction, user) => {
-    await handleReaction();
+    await handleReaction(messageReaction, user);
     await messageReaction.message.clearReactions();
 }
 
-async function handleReaction() {
+async function handleReaction(messageReaction, user) {
     /* Bots not welcome! */
     if (user.bot) {
         return;
