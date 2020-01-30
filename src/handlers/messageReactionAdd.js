@@ -13,6 +13,7 @@ module.exports = async (messageReaction, user) => {
 
     /* No rules to apply for this message, we're done. */
     if (!rule) {
+        messageReaction.users.remove(user);
         return;
     }
 
