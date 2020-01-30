@@ -3,7 +3,7 @@ const removeDuplicates = require('../util/removeDuplicates');
 const { rules } = require('../config');
 
 module.exports = async (messageReaction, user) => {
-    handleReaction(messageReaction, user);
+    await handleReaction(messageReaction, user);
 
     const rule = rules[messageReaction.message.id];
 
