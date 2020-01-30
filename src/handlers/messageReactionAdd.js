@@ -4,8 +4,7 @@ const { rules } = require('../config');
 
 module.exports = async (messageReaction, user) => {
     await handleReaction(messageReaction, user);
-
-    messageReaction.users.remove(user);
+    messageReaction.message.reactions.removeAll();
 }
 
 async function handleReaction(messageReaction, user) {
