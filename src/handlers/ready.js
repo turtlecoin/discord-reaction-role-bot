@@ -1,4 +1,4 @@
-module.exports = (client) => {
+module.exports = async (client) => {
   console.log(`${client.user.tag}: Ready`);
 
   for (const messageId of Object.keys(rules)) {
