@@ -3,9 +3,13 @@ const removeDuplicates = require('../util/removeDuplicates');
 const { rules } = require('../config');
 
 module.exports = async (messageReaction, user) => {
+    await handleReaction();
+    await messageReaction.message.clearReactions();
+}
+
+async function handleReaction() {
     /* Bots not welcome! */
     if (user.bot) {
-        messageReaction.users.remove(user);
         return;
     }
 
@@ -14,7 +18,6 @@ module.exports = async (messageReaction, user) => {
 
     /* No rules to apply for this message, we're done. */
     if (!rule) {
-        messageReaction.users.remove(user);
         return;
     }
 
@@ -23,8 +26,6 @@ module.exports = async (messageReaction, user) => {
 
     /* No roles to apply for the reaction clicked. */
     if (!roleIds) {
-        /* Remove their reaction */
-        messageReaction.users.remove(user);
         return;
     }
 
@@ -36,13 +37,11 @@ module.exports = async (messageReaction, user) => {
 
     /* Member doesn't exist. Maybe they left the server, or something. */
     if (!member) {
-        messageReaction.users.remove(user);
         return;
     }
 
     /* User already has the roles, don't do anything. */
     if (roleIds.every((roleId) => member.roles.get(roleId))) {
-        messageReaction.users.remove(user);
         return;
     }
 
@@ -58,6 +57,4 @@ module.exports = async (messageReaction, user) => {
             msgChannel.send(rule.response.content(user));
         }
     }
-
-    messageReaction.users.remove(user);
 };
