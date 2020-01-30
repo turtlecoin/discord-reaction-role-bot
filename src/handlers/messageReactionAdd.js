@@ -12,7 +12,7 @@ module.exports = async (messageReaction, user) => {
     }
 }
 
-function handleReaction(messageReaction, user) {
+async function handleReaction(messageReaction, user) {
     /* Get the rules to apply to the message reacted to */
     const rule = rules[messageReaction.message.id];
 
