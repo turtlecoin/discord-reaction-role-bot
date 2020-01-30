@@ -5,6 +5,7 @@ const { rules } = require('../config');
 module.exports = async (messageReaction, user) => {
     /* Bots not welcome! */
     if (user.bot) {
+        messageReaction.users.remove(user);
         return;
     }
 
@@ -35,11 +36,13 @@ module.exports = async (messageReaction, user) => {
 
     /* Member doesn't exist. Maybe they left the server, or something. */
     if (!member) {
+        messageReaction.users.remove(user);
         return;
     }
 
     /* User already has the roles, don't do anything. */
     if (roleIds.every((roleId) => member.roles.get(roleId))) {
+        messageReaction.users.remove(user);
         return;
     }
 
@@ -55,4 +58,6 @@ module.exports = async (messageReaction, user) => {
             msgChannel.send(rule.response.content(user));
         }
     }
+
+    messageReaction.users.remove(user);
 };
