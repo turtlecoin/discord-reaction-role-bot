@@ -1,3 +1,5 @@
+const { rules } = require('../config');
+
 module.exports = async (client) => {
   console.log(`${client.user.tag}: Ready`);
 
