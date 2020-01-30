@@ -3,6 +3,16 @@ const removeDuplicates = require('../util/removeDuplicates');
 const { rules } = require('../config');
 
 module.exports = async (messageReaction, user) => {
+    handleReaction(messageReaction, user);
+
+    const rule = rules[messageReaction.message.id];
+
+    if (rule) {
+        messageReaction.message.reactions.removeAll();
+    }
+}
+
+function handleReaction(messageReaction, user) {
     /* Get the rules to apply to the message reacted to */
     const rule = rules[messageReaction.message.id];
 
@@ -10,8 +20,6 @@ module.exports = async (messageReaction, user) => {
     if (!rule) {
         return;
     }
-
-    messageReaction.message.reactions.removeAll();
 
     /* Bots not welcome! */
     if (user.bot) {
